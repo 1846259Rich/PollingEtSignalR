@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-polling',
@@ -36,18 +37,21 @@ export class PollingComponent implements OnInit {
     this.updateTasks();
   }
 
-  complete(id: number) {
+  async complete(id: number) {
     // TODO On invoke la méthode pour compléter une tâche sur le serveur (Contrôleur d'API)
+    await lastValueFrom(this.http.get<any>(this.apiUrl + 'UselessTasks/Complete/' + id));
   }
 
-  addtask() {
+  async addtask() {
     // TODO On invoke la méthode pour ajouter une tâche sur le serveur (Contrôleur d'API)
-
-    console.log(this.tasks);
+    if(this.taskname == '') return;
+    this.tasks.push(await lastValueFrom(this.http.post<UselessTask>(this.apiUrl + 'UselessTasks/Add?taskText=' + this.taskname, null)));
   }
 
   async updateTasks() {
     // TODO: Faire une première implémentation simple avec un appel au serveur pour obtenir la liste des tâches
     // TODO: UNE FOIS QUE VOUS AVEZ TESTER AVEC DEUX CLIENTS: Utiliser le polling pour mettre la liste de tasks à jour chaque seconde
+    let x = await lastValueFrom(this.http.get<UselessTask[]>(this.apiUrl + 'UselessTasks/GetAll'));
+    this.tasks = x;
   }
 }
